@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "name": "Shah Rukh Khan",
+  "email": "srk@example.com",
+  "profile": "https://www.deccanchronicle.com/h-upload/2025/05/02/1913661-shahrukhkhan.webp",
+  "user_overview": {
+    "active_users_today": 100,
+    "paying_users": 50,
+    "new_users_last_week": 500,
+    "monthly_revenue": 1000
+  }
+}

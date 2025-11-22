@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the sidebar */
+.ant-menu {
+  width: 320px !important;
+}
+
+.ant-menu .ant-menu-item-selected {
+  background: linear-gradient(to right, #00d196, #00c2a1);
+  color: #ffffff !important;
+}
+
+.ant-menu .ant-menu-item-selected a {
+  color: #ffffff !important;
+}
+
+.ant-menu .ant-menu-item:hover {
+  background: linear-gradient(to right, #00d196, #00c2a1);
+  color: #ffffff !important;
+}
+
+.ant-menu .ant-menu-submenu-title:hover {
+  background: linear-gradient(to right, #00d196, #00c2a1);
+  color: #ffffff !important;
+}
+
+.ant-menu .ant-menu-item a {
+  color: #002436;
+  font-size: 14px;
+}
+
+.ant-table .ant-table-thead > tr > th::before {
+  display: none !important;
+}
+
+/* For the Settings submenu header */
+.ant-menu .ant-menu-submenu-title {
+  background-color: #2e3f49 !important;
+}
+
+/* For the Settings submenu items */
+.ant-menu .ant-menu-submenu .ant-menu-item {
+  background-color: #2e3f49 !important;
+}
+
+/* Hover state for submenu items */
+.ant-menu .ant-menu-submenu .ant-menu-item:hover {
+  background: linear-gradient(to right, #00d196, #00c2a1);
+}
+
+/* Selected state for submenu items */
+.ant-menu .ant-menu-submenu .ant-menu-item-selected {
+  background: linear-gradient(to right, #00d196, #00c2a1);
+}
+
+
+.bgBlack {
+  background-color: #e6faf6 !important;
+}
+
+.my-main-button {
+  color: #ffffff;
+  background: linear-gradient(to right, #00d196, #00c2a1);
+  border: none;
+}
+
+.my-main-button:hover {
+  background: linear-gradient(to right, #0eb893, #10ac84) !important;
+  color: #fff !important;
+  border: none !important;
+}
