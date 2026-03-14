@@ -23,17 +23,14 @@ const AddAdmin = ({ refetch }) => {
   const handleFinish = async (values) => {
     try {
       setLoading(true);
-      // await API.post("/admin-dashboard/create-admins/", values);
+      await API.post("/accounts/admin/", values);
       message.success("Admin created successfully!");
       refetch?.();
       setIsModalOpen(false);
       form.resetFields();
     } catch (err) {
-      message.error(
-        err.response?.data?.email
-          ? err.response?.data?.email[0]
-          : "Failed to create admin"
-      );
+      console.log(err, "err");
+      message.error(err.response?.data?.message || "Failed to create admin");
     } finally {
       setLoading(false);
     }
@@ -97,19 +94,6 @@ const AddAdmin = ({ refetch }) => {
             rules={[{ required: true, message: "Please enter phone number" }]}
           >
             <Input placeholder="+880..." />
-          </Form.Item>
-
-          <Form.Item
-            label="Role"
-            name="role"
-            rules={[{ required: true, message: "Please select role" }]}
-          >
-            <Select placeholder="Select role">
-              <Option value="superadmin">Super Admin</Option>
-              <Option value="admin">Admin</Option>
-              <Option value="categorymanagement">Category Manager</Option>
-              <Option value="moderator">Moderator</Option>
-            </Select>
           </Form.Item>
 
           <Form.Item>

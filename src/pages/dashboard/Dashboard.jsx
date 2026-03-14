@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { BarChart3 } from "lucide-react";
+import { useAdmin } from "../../context/AdminContext";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -29,15 +30,7 @@ const monthlyData = [
 
 const generateDailyData = () => {
   const data = [];
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-  ];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
 
   months.forEach((month) => {
     const daysInMonth = 30;
@@ -59,6 +52,8 @@ const dailyData = generateDailyData();
 function Dashboard() {
   const [timeRange, setTimeRange] = useState("monthly");
   const [revenueRange, setRevenueRange] = useState("30");
+
+  const { adminProfile, isLoading, isError, error, refetch } = useAdmin();
 
   const getFilteredRevenueData = () => {
     if (revenueRange === "30") {
@@ -92,13 +87,26 @@ function Dashboard() {
     },
   ];
 
+  const hour = new Date().getHours();
+  let message = "";
+
+  if (hour >= 5 && hour < 12) {
+    message = "Good Morning";
+  } else if (hour >= 12 && hour < 16) {
+    message = "Good Afternoon";
+  } else if (hour >= 16 && hour < 19) {
+    message = "Good Evening";
+  } else {
+    message = "Good Night";
+  }
+
   return (
     <div className="">
       {/* Header */}
       <div className="mb-8 bg-white p-6 rounded-2xl">
-        <Text className="text-gray-600 block mb-1">Hi, Good Morning</Text>
+        <Text className="text-gray-600 block mb-1">Hi, {message}</Text>
         <Title level={2} className="!mb-0 !mt-0">
-          Shah Rukh Khan
+          {adminProfile?.first_name + " " + adminProfile?.last_name}
         </Title>
       </div>
 
@@ -130,8 +138,7 @@ function Dashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Registered vs Paying Users */}
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <Card
           className="shadow-sm"
@@ -189,7 +196,6 @@ function Dashboard() {
           </ResponsiveContainer>
         </Card>
 
-        {/* Revenue & New Paying Users */}
         <Card
           className="shadow-sm"
           title={
@@ -260,7 +266,7 @@ function Dashboard() {
             </LineChart>
           </ResponsiveContainer>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -26,20 +26,22 @@ const AdminEdit = ({ adminProfile, refetch }) => {
       const submitData = {
         name: values.full_name,
         phone_number: values.phone,
-        role: values.role,
-        user_id: adminProfile.id,
       };
 
-      // const res = await API.patch("/admin-dashboard/admin-update/", submitData);
+      const res = await API.put(
+        `/accounts/admin/${adminProfile.id}/`,
+        submitData,
+      );
 
-      // if (res.status === 200) {
-      //   message.success("Admin updated successfully!");
-      //   refetch();
-      //   setIsModalOpen(false);
-      // }
+      if (res.status === 200) {
+        message.success("Admin updated successfully!");
+        refetch?.();
         setIsModalOpen(false);
+      }
+      setIsModalOpen(false);
     } catch (err) {
-      message.error(err.response?.data?.error || "Failed to update Admin");
+      console.log(err, "err");
+      message.error(err.response?.data?.message || "Failed to update Admin");
     } finally {
       setLoading(false);
     }
@@ -68,10 +70,9 @@ const AdminEdit = ({ adminProfile, refetch }) => {
           onFinish={handleFinish}
           initialValues={{
             id: adminProfile?.id,
-            full_name: adminProfile?.full_name,
+            full_name: adminProfile?.name,
             email: adminProfile?.email,
-            phone: adminProfile?.phone,
-            role: adminProfile?.role,
+            phone: adminProfile?.phone_number,
           }}
         >
           <Form.Item
@@ -101,15 +102,6 @@ const AdminEdit = ({ adminProfile, refetch }) => {
             ]}
           >
             <Input />
-          </Form.Item>
-
-          <Form.Item label="Role" name="role">
-            <Select placeholder="Select role">
-              <Option value="superadmin">Super Admin</Option>
-              <Option value="admin">Admin</Option>
-              <Option value="categorymanagement">Category Manager</Option>
-              <Option value="moderator">Moderator</Option>
-            </Select>
           </Form.Item>
 
           <Form.Item>

@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Avatar, Button, DatePicker, Table } from "antd";
+import { Avatar, Button, DatePicker, Table, Tag } from "antd";
 import IsError from "../../components/IsError";
 import IsLoading from "../../components/IsLoading";
 import { useAllPayments } from "../../api/paymentApi";
+
 const { RangePicker } = DatePicker;
 
 function Payments() {
   const [filter, setFilter] = useState({
     page: 1,
-    limit: 10,
+    limit: 50,
   });
 
   const { allPayments, isLoading, isError, error, refetch } =
@@ -24,73 +25,74 @@ function Payments() {
 
   const columns = [
     {
-      title: <span>SL No.</span>,
-      dataIndex: "id",
-      key: "id",
-      render: (text, record, index) => (
-        <span className="">
-          #{index + 1 + (filter.page - 1) * filter.limit}
-        </span>
+      title: "SL No.",
+      key: "serial",
+      render: (_, __, index) => (
+        <span>#{index + 1 + (filter.page - 1) * filter.limit}</span>
       ),
     },
+
     {
-      title: <span>Payment Date</span>,
-      dataIndex: "payment_date",
-      key: "payment_date",
-      render: (payment_date) => <span className="">{payment_date}</span>,
+      title: "Payment Date",
+      dataIndex: "start_date",
+      key: "start_date",
+      render: (date) => new Date(date).toLocaleString(),
     },
+
     {
-      title: <span>User</span>,
-      dataIndex: "id",
-      key: "id",
+      title: "User",
+      key: "user",
       render: (_, record) => (
         <div className="flex gap-2 items-center">
-          <Avatar
-            src={record?.user_profile}
-            alt={record?.user_name}
-            className="!w-[40px] !h-[40px] rounded-full mt-[-5px]"
-          />
+          <Avatar className="!w-[40px] !h-[40px] mt-[-10px]">
+            {record?.user_name?.charAt(0) || "U"}
+          </Avatar>
 
-          <div className="mt-1">
-            <h2>{record?.user_name}</h2>
-            <p className="text-sm">{record?.user_email}</p>
+          <div>
+            <h2 className="font-medium">{record?.user_name || "Unknown"}</h2>
+            <p className="text-sm text-gray-500">
+              {record?.user_email || "No Email"}
+            </p>
           </div>
         </div>
       ),
     },
+
     {
-      title: <span>Plan</span>,
-      dataIndex: "plan",
-      key: "plan",
-      render: (plan) => <span className="">{plan}</span>,
+      title: "Plan",
+      dataIndex: "plan_name",
+      key: "plan_name",
     },
+
     {
-      title: <span>Amount</span>,
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount) => <span className="">${amount}</span>,
+      title: "Interval",
+      dataIndex: "plan_interval",
+      key: "plan_interval",
+      render: (interval) => <Tag color="blue">{interval}</Tag>,
     },
+
     {
-      title: <span>Status</span>,
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => (
         <Button
           className={
-            status === "Active" || status === "Paid"
-              ? `!bg-[#e0ffe4] !border-none`
-              : `!bg-[#ffe0e0] !border-none`
+            status === "ACTIVE"
+              ? "!bg-[#e6fffb] !border-none"
+              : "!bg-[#fff1f0] !border-none"
           }
         >
           {status}
         </Button>
       ),
     },
+
     {
-      title: <span>Payment Method</span>,
-      dataIndex: "payment_method",
-      key: "payment_method",
-      render: (payment_method) => <span className="">{payment_method}</span>,
+      title: "Current Period End",
+      dataIndex: "current_period_end",
+      key: "current_period_end",
+      render: (date) => new Date(date).toLocaleString(),
     },
   ];
 
@@ -103,25 +105,25 @@ function Payments() {
   }
 
   return (
-    <div className="">
-      <div className="flex justify-between mb-4">
+    <div>
+      {/* <div className="flex justify-between mb-4">
         <div></div>
         <RangePicker size="large" />
-      </div>
+      </div> */}
 
       <Table
         columns={columns}
-        dataSource={allPayments}
-        rowKey="date"
+        dataSource={allPayments?.results || []}
+        isLoading={isLoading}
+        rowKey="id"
         pagination={{
           current: filter.page,
           pageSize: filter.limit,
-          total: allPayments.length,
+          total: allPayments?.count || 0,
           showSizeChanger: true,
           pageSizeOptions: ["10", "20", "50", "100"],
         }}
         onChange={handleTableChange}
-        loading={isLoading}
       />
     </div>
   );

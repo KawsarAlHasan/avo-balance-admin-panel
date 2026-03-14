@@ -15,14 +15,6 @@ function Plans() {
 
   const { allPlans, isLoading, isError, error, refetch } = useAllPlans(filter);
 
-  const handleTableChange = (pagination) => {
-    setFilter((prev) => ({
-      ...prev,
-      page: pagination.current,
-      limit: pagination.pageSize,
-    }));
-  };
-
   // delete confirm modal
   const showDeleteConfirm = (planId) => {
     Modal.confirm({
@@ -51,36 +43,38 @@ function Plans() {
       dataIndex: "serial_number",
       key: "serial_number",
       render: (text, record, index) => (
-        <span className="">
-          #{index + 1 + (filter.page - 1) * filter.limit}
-        </span>
+        <span>#{index + 1 + (filter.page - 1) * filter.limit}</span>
       ),
     },
     {
       title: <span>Plan Name</span>,
-      dataIndex: "plan_name",
-      key: "plan_name",
-      render: (plan_name) => <span className="">{plan_name}</span>,
+      dataIndex: "name",
+      key: "name",
+      render: (name) => <span>{name}</span>,
     },
     {
       title: <span>Price</span>,
       dataIndex: "price",
       key: "price",
-      render: (price) => <span className="">${price}</span>,
+      render: (price) => <span>${price}</span>,
     },
     {
       title: <span>Currency</span>,
       dataIndex: "currency",
       key: "currency",
-      render: (currency) => <span className="">{currency}</span>,
+      render: (currency) => <span>{currency}</span>,
     },
     {
-      title: <span>Number of Active Users</span>,
-      dataIndex: "num_of_active_users",
-      key: "num_of_active_users",
-      render: (num_of_active_users) => (
-        <span className="">{num_of_active_users}</span>
-      ),
+      title: <span>Interval</span>,
+      dataIndex: "interval",
+      key: "interval",
+      render: (interval) => <span>{interval}</span>,
+    },
+    {
+      title: <span>Subscribers</span>,
+      dataIndex: "subscriber_count",
+      key: "subscriber_count",
+      render: (subscriber_count) => <span>{subscriber_count}</span>,
     },
     {
       title: <span>Status</span>,
@@ -89,31 +83,29 @@ function Plans() {
       render: (status) => (
         <Button
           className={
-            status === "Visible"
-              ? `!bg-[#e0ffe4] !border-none`
-              : `!bg-[#ffe0e0] !border-none`
+            status === "ACTIVE"
+              ? "!bg-[#e0ffe4] !border-none !text-green-700"
+              : "!bg-[#ffe0e0] !border-none !text-red-600"
           }
         >
           {status}
         </Button>
       ),
     },
-    {
-      title: <span>Action</span>,
-      key: "action",
-      render: (_, record) => {
-        return (
-          <Space size="middle">
-            <PlanEdit record={record} refetch={refetch} />
+    // {
+    //   title: <span>Action</span>,
+    //   key: "action",
+    //   render: (_, record) => (
+    //     <Space size="middle">
+    //       <PlanEdit record={record} refetch={refetch} />
 
-            <DeleteOutlined
-              className={`text-[23px] bg-[#E30000] p-1 rounded-sm text-white hover:text-red-300 cursor-pointer`}
-              onClick={() => showDeleteConfirm(record.id)}
-            />
-          </Space>
-        );
-      },
-    },
+    //       <DeleteOutlined
+    //         className="text-[23px] bg-[#E30000] p-1 rounded-sm text-white hover:text-red-300 cursor-pointer"
+    //         onClick={() => showDeleteConfirm(record.id)}
+    //       />
+    //     </Space>
+    //   ),
+    // },
   ];
 
   if (isLoading) {
@@ -126,21 +118,14 @@ function Plans() {
 
   return (
     <div className="">
-      <AddPlan refetch={refetch} />
+      {/* <AddPlan refetch={refetch} /> */}
 
       <Table
         columns={columns}
         dataSource={allPlans}
         rowKey="id"
         loading={isLoading}
-        pagination={{
-          current: filter.page,
-          pageSize: filter.limit,
-          total: allPlans.length,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50", "100"],
-        }}
-        onChange={handleTableChange}
+        pagination={false}
       />
     </div>
   );

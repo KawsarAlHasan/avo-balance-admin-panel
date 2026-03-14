@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { API } from "./api";
 
-export const useAllPayments = ({ page = 1, limit = 10 }) => {
+export const useAllPayments = ({ page = 1, limit = 50 }) => {
   const getData = async () => {
-    const response = await axios.get("/payment.json");
+    const response = await API.get(`/accounts/subscriptions?page=${page}&page_size=${limit}`);
 
     return response.data;
   };

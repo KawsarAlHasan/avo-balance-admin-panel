@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { API } from "./api";
 
 export const useAllPlans = ({ page = 1, limit = 10 }) => {
   const getData = async () => {
-    const response = await axios.get("/plans.json");
+    const response = await API.get("/accounts/plans/");
 
     return response.data;
   };

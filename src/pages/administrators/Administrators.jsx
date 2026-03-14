@@ -4,25 +4,11 @@ import IsLoading from "../../components/IsLoading";
 import { DeleteOutlined } from "@ant-design/icons";
 import AddAdmin from "./AddAmin";
 import AdminEdit from "./AdminEdit";
-import { useState } from "react";
 import { useAllAdmins } from "../../api/usersApi";
+import { API } from "../../api/api";
 
 function Administrators() {
-  const [filter, setFilter] = useState({
-    page: 1,
-    limit: 10,
-  });
-
-  const { allAdmins, isLoading, isError, error, refetch } =
-    useAllAdmins(filter);
-
-  const handleTableChange = (pagination) => {
-    setFilter((prev) => ({
-      ...prev,
-      page: pagination.current,
-      limit: pagination.pageSize,
-    }));
-  };
+  const { allAdmins, isLoading, isError, error, refetch } = useAllAdmins();
 
   // delete confirm modal
   const showDeleteConfirm = (adminId) => {
@@ -34,12 +20,11 @@ function Administrators() {
       cancelText: "Cancel",
       async onOk() {
         try {
-          // await API.post(`/admin-dashboard/delete-user/`, {
-          //   user_id: adminId,
-          // });
+          await API.delete(`/accounts/admin/${adminId}/`);
           message.success("Admin deleted successfully!");
           refetch();
         } catch (err) {
+          console.log(err, "err");
           message.error(err.response?.data?.error || "Failed to delete admin");
         }
       },
@@ -49,19 +34,15 @@ function Administrators() {
   const columns = [
     {
       title: <span>Sl no.</span>,
-      dataIndex: "serial_number",
-      key: "serial_number",
-      render: (text, record, index) => (
-        <span className="">
-          #{index + 1 + (filter.page - 1) * filter.limit}
-        </span>
-      ),
+      dataIndex: "#",
+      key: "#",
+      render: (_, record, index) => <span className="">#{index + 1}</span>,
     },
     {
       title: <span>Name</span>,
-      dataIndex: "full_name",
-      key: "full_name",
-      render: (full_name) => <span className="">{full_name}</span>,
+      dataIndex: "name",
+      key: "name",
+      render: (name) => <span className="">{name}</span>,
     },
     {
       title: <span>Email</span>,
@@ -71,9 +52,11 @@ function Administrators() {
     },
     {
       title: <span>Phone</span>,
-      dataIndex: "phone",
-      key: "phone",
-      render: (phone) => <span className="">{phone}</span>,
+      dataIndex: "phone_number",
+      key: "phone_number",
+      render: (phone_number) => (
+        <span className="">{phone_number || "N/A"}</span>
+      ),
     },
     {
       title: <span>Has Access To</span>,
@@ -124,14 +107,7 @@ function Administrators() {
         dataSource={allAdmins}
         rowKey="id"
         loading={isLoading}
-        pagination={{
-          current: filter.page,
-          pageSize: filter.limit,
-          total: allAdmins.length,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50", "100"],
-        }}
-        onChange={handleTableChange}
+        pagination={false}
       />
     </div>
   );

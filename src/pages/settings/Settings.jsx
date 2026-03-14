@@ -1,9 +1,19 @@
-import React, { useState } from "react";
-import { Input, Button, message, Select } from "antd";
+import React, { useState, useEffect } from "react";
+import { Input, Button, message, Spin } from "antd";
+import { useSettings } from "../../api/settingsApi";
+import { API } from "../../api/api";
 
 function Settings() {
-  const [apiKey, setApiKey] = useState("your_api_key");
+  const { openAi, isLoading, isError, error, refetch } = useSettings();
+
+  const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (openAi) {
+      setApiKey(openAi);
+    }
+  }, [openAi]);
 
   const handleSave = async () => {
     if (!apiKey.trim()) {
@@ -13,17 +23,36 @@ function Settings() {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await API.post("/accounts/openai-key/", {
+        api_key: apiKey,
+      });
+
+      console.log(response, "response");
+
       message.success("API key saved successfully!");
+
+      refetch();
+    } catch (error) {
+      console.error(error, "error");
+
+      message.error(
+        error?.response?.data?.error ||
+          "Something went wrong. Please try again.",
+      );
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
-    <div className="">
+    <div>
       <div className="bg-white w-full p-6 rounded-2xl shadow-sm">
         <h2 className="text-2xl font-semibold mb-6">Update Your Api Key</h2>
+
+        {isLoading && <Spin size="large" />}
+
+        {isError && <div className="text-red-500">Error: {error?.message}</div>}
 
         <div className="bg-blue-50 p-4 rounded-lg flex items-start gap-4">
           <Input.Password
@@ -47,7 +76,7 @@ function Settings() {
         </div>
       </div>
 
-      <div className="bg-white w-full p-6 rounded-2xl shadow-sm mt-6">
+      {/* <div className="bg-white w-full p-6 rounded-2xl shadow-sm mt-6">
         <h2 className="text-2xl font-semibold mb-6">System timezone</h2>
 
         <div className="bg-blue-50 p-4 rounded-lg flex items-start gap-4">
@@ -83,7 +112,7 @@ function Settings() {
             <Select.Option value="JPY">JPY</Select.Option>
           </Select>
         </div>
-      </div>
+      </div> */}
 
       <div className="bg-white w-full p-6 rounded-2xl shadow-sm mt-6">
         <h2 className="text-2xl font-semibold mb-6">App version</h2>
@@ -91,7 +120,8 @@ function Settings() {
         <p className="text-[20px]">
           View the current backend version and app version information for Avo
           Balance. This section helps you stay updated with the latest releases,
-          improvements, and system updates. <br />
+          improvements, and system updates.
+          <br />
           Here you can find the latest system updates, new features, and version
           changes for your Avo Balance experience.
         </p>

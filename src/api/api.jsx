@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
+export const baseURL = "https://avo.dsrt321.online";
+
 export const API = axios.create({
-  baseURL: "http://localhost:8000/api/",
+  baseURL: baseURL,
 });
 
 API.interceptors.request.use((config) => {
@@ -37,6 +39,8 @@ export const useAdminDashboard = () => {
 // sign out
 export const signOutAdmin = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("adminProfile");
+  localStorage.removeItem("profileTimestamp");
   window.location.href = "/login";
 };
 
@@ -65,7 +69,7 @@ export const useDashboardOverview = () => {
 export const useAllUser = ({ page = 1, limit = 10 }) => {
   const getData = async () => {
     const response = await API.get(
-      `/admin-dashboard/user-list/?page=${page}&limit=${limit}`
+      `/admin-dashboard/user-list/?page=${page}&limit=${limit}`,
     );
 
     return response.data;
@@ -89,7 +93,7 @@ export const useAllUser = ({ page = 1, limit = 10 }) => {
 export const useAdminList = ({ page = 1, limit = 10 }) => {
   const getData = async () => {
     const response = await API.get(
-      `/admin-dashboard/admin_list/?page=${page}&limit=${limit}`
+      `/admin-dashboard/admin_list/?page=${page}&limit=${limit}`,
     );
 
     return response.data;
@@ -113,7 +117,7 @@ export const useAdminList = ({ page = 1, limit = 10 }) => {
 export const usePayouts = ({ page = 1, limit = 10 }) => {
   const getData = async () => {
     const response = await API.get(
-      `/admin-dashboard/payment-history/?page=${page}&limit=${limit}`
+      `/admin-dashboard/payment-history/?page=${page}&limit=${limit}`,
     );
 
     return response.data;
@@ -138,7 +142,7 @@ export const useUserChat = ({ userID }, options = {}) => {
   const getData = async ({ queryKey }) => {
     const [_key, userID] = queryKey;
     const response = await API.get(
-      `/admin-dashboard/user-chathistory/${userID}/`
+      `/admin-dashboard/user-chathistory/${userID}/`,
     );
     return response.data;
   };
@@ -163,7 +167,7 @@ export const useUserScanHistory = ({ userID }, options = {}) => {
   const getData = async ({ queryKey }) => {
     const [_key, userID] = queryKey;
     const response = await API.get(
-      `/admin-dashboard/user-scan-history/${userID}/`
+      `/admin-dashboard/user-scan-history/${userID}/`,
     );
     return response.data;
   };
@@ -188,7 +192,7 @@ export const useUserSavedRecipes = ({ userID }, options = {}) => {
   const getData = async ({ queryKey }) => {
     const [_key, userID] = queryKey;
     const response = await API.get(
-      `/admin-dashboard/user-saved-recipes/${userID}/`
+      `/admin-dashboard/user-saved-recipes/${userID}/`,
     );
     return response.data;
   };

@@ -4,26 +4,19 @@ import logoImage from "../assets/logo.png";
 import { MenuOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import ChangePassword from "./ChangePassword";
 import AccountSetting from "./AccountSetting";
-import { signOutAdmin, useAdminDashboard } from "../api/api";
+import { signOutAdmin } from "../api/api";
+import { useAdmin } from "../context/AdminContext";
 
 const Navbar = ({ showDrawer }) => {
-  // const { adminDashboard: adminProfile, isLoading, isError, error, refetch } =
-  //   useAdminDashboard();
+  const { adminProfile, isLoading, isError, error, refetch } = useAdmin();
+
+  // console.log("adminProfile", adminProfile);
 
   const navigate = useNavigate();
 
   const handleSignOut = () => {
     signOutAdmin();
     navigate("/login");
-  };
-
-  const adminProfile = {
-    name: "Sha Rukh Khan",
-    profile:
-      "https://sm.mashable.com/t/mashable_me/photo/default/shah-rukh-khan-hurun-india-rich-list_h1bt.1248.jpg",
-    role: "Super Admin",
-    email: "super@admin.com",
-    phone_number: "1234567890",
   };
 
   const profileMenuItems = [
@@ -39,10 +32,10 @@ const Navbar = ({ showDrawer }) => {
             />
             <div>
               <h1 className="text-[#242424] text-[16px] font-bold mb-1">
-                {adminProfile?.name}
+                {adminProfile?.first_name + " " + adminProfile?.last_name}
               </h1>
               <Tag color="blue" className="m-0">
-                {adminProfile?.role}
+                {adminProfile?.username}
               </Tag>
             </div>
           </div>
@@ -54,7 +47,7 @@ const Navbar = ({ showDrawer }) => {
     },
     {
       key: "profile",
-      label: <AccountSetting adminProfile={adminProfile} />,
+      label: <AccountSetting adminProfile={adminProfile} refetch={refetch} />,
     },
     {
       key: "change-password",
@@ -111,10 +104,10 @@ const Navbar = ({ showDrawer }) => {
                 />
                 <div className="hidden md:block ">
                   <div className="text-[#242424] text-[14px] font-semibold leading-tight">
-                    {adminProfile?.name}
+                    {adminProfile?.first_name + " " + adminProfile?.last_name}
                   </div>
                   <div className="text-[12px] text-gray-500 leading-tight">
-                    {adminProfile?.role}
+                    {adminProfile?.username}
                   </div>
                 </div>
                 <div className="hidden md:block">

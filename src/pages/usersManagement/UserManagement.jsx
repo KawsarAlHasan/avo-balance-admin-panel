@@ -1,24 +1,48 @@
 import { useState } from "react";
-import { Table, Space, Image, Avatar, Button, Input, Select } from "antd";
-import { MdBlock } from "react-icons/md";
+import {
+  Table,
+  Avatar,
+  Button,
+  Input,
+  Select,
+  Tag,
+  Space,
+  Modal,
+  message,
+  Switch,
+} from "antd";
+import {
+  EyeOutlined,
+  DeleteOutlined,
+  PoweroffOutlined,
+} from "@ant-design/icons";
+
 import IsError from "../../components/IsError";
 import IsLoading from "../../components/IsLoading";
-import { EyeOutlined } from "@ant-design/icons";
 import ViewUser from "./ViewUser";
-import { useAllUsers } from "../../api/usersApi";
 import AddUser from "./AddUser";
+import { useAllUsers } from "../../api/usersApi";
+import { API } from "../../api/api";
 
 const { Search } = Input;
 
 function UserManagement() {
   const [filter, setFilter] = useState({
     page: 1,
-    limit: 10,
+    limit: 20,
+    search: "",
   });
 
   const [userDetailsData, setUserDetailsData] = useState(null);
-
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  const [activeModalData, setActiveModalData] = useState(null);
+  const [isActiveModalOpen, setIsActiveModalOpen] = useState(false);
+  const [activeLoading, setActiveLoading] = useState(false);
+
+  const [deleteModalData, setDeleteModalData] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { allUsers, isLoading, isError, error, refetch } = useAllUsers(filter);
 
@@ -29,7 +53,6 @@ function UserManagement() {
 
   const handleModalClose = () => {
     setUserDetailsData(null);
-
     setIsViewModalOpen(false);
   };
 
@@ -41,161 +64,349 @@ function UserManagement() {
     }));
   };
 
-  const onChange = (value) => {
-    console.log(`selected ${value}`);
+  const onSearch = (value) => {
+    setFilter((prev) => ({ ...prev, search: value, page: 1 }));
   };
 
-  const onSearch = (value) => {
-    setFilter((prev) => ({
-      ...prev,
-      search: value,
-    }));
+  const handlePlanFilter = (value) => {
+    setFilter((prev) => ({ ...prev, plan: value, page: 1 }));
+  };
+
+  const handleStatusFilter = (value) => {
+    setFilter((prev) => ({ ...prev, status: value, page: 1 }));
+  };
+
+  // Active/Deactive Modal
+  const handleOpenActiveModal = (record) => {
+    setActiveModalData(record);
+    setIsActiveModalOpen(true);
+  };
+
+  const handleActiveModalClose = () => {
+    setActiveModalData(null);
+    setIsActiveModalOpen(false);
+  };
+
+  const handleToggleActive = async () => {
+    if (!activeModalData) return;
+    setActiveLoading(true);
+    try {
+      const response = await API.put(`/accounts/users/${activeModalData.id}/`, {
+        is_active: !activeModalData.is_active,
+      });
+
+      console.log(response, "response");
+
+      message.success(
+        `User ${!activeModalData.is_active ? "activated" : "deactivated"} successfully`,
+      );
+      refetch();
+      handleActiveModalClose();
+    } catch (error) {
+      console.error(error, "error");
+      message.error(error?.response?.data?.error || "Something went wrong");
+    } finally {
+      setActiveLoading(false);
+    }
+  };
+
+  // Delete Modal
+  const handleOpenDeleteModal = (record) => {
+    setDeleteModalData(record);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteModalClose = () => {
+    setDeleteModalData(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteModalData) return;
+    setDeleteLoading(true);
+    try {
+      const response = await API.delete(
+        `/accounts/users/${deleteModalData.id}/`,
+      );
+
+      console.log(response, "response");
+
+      message.success("User deleted successfully");
+      refetch();
+      handleDeleteModalClose();
+    } catch (error) {
+      console.error(error, "error");
+      message.error(error?.response?.data?.error || "Something went wrong");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const getSubscriptionStatus = (record) => {
+    if (!record.subscription) return "FREE";
+    const endDate = new Date(record.subscription.current_period_end);
+    const today = new Date();
+    if (endDate < today) return "EXPIRED";
+    return record.subscription.status;
   };
 
   const columns = [
     {
-      title: <span>Sl no.</span>,
-      dataIndex: "id",
-      key: "id",
-      render: (text, record, index) => (
-        <span className="">
-          #{index + 1 + (filter.page - 1) * filter.limit}
-        </span>
+      title: "SL",
+      render: (_, __, index) => (
+        <span>#{index + 1 + (filter.page - 1) * filter.limit}</span>
       ),
-    },
-    {
-      title: <span>User</span>,
-      dataIndex: "id",
-      key: "id",
-      render: (_, record) => (
-        <div className="flex gap-2 items-center">
-          <Avatar
-            src={record?.profile}
-            alt={record?.name}
-            className="!w-[45px] !h-[45px] rounded-full mt-[-5px]"
-          />
-          <div className="mt-1">
-            <h2>{record?.name}</h2>
-            <p className="text-sm">{record?.email}</p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: <span>Current Plan</span>,
-      dataIndex: "plan",
-      key: "plan",
-      render: (plan) => <span>{plan}</span>,
-    },
-    {
-      title: <span>Status</span>,
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Button
-          className={
-            status === "Active"
-              ? `!bg-[#e0ffe4] !border-none`
-              : `!bg-[#ffe0e0] !border-none`
-          }
-        >
-          {status}
-        </Button>
-      ),
-    },
-    {
-      title: <span>Registration Date</span>,
-      dataIndex: "registration_date",
-      key: "registration_date",
-      render: (registration_date) => <span>{registration_date}</span>,
-    },
-    {
-      title: <span>Next Payment Date</span>,
-      dataIndex: "next_payment_date",
-      key: "next_payment_date",
-      render: (next_payment_date) => <span>{next_payment_date}</span>,
     },
 
     {
-      title: <span>View Details</span>,
-      key: "action",
+      title: "User",
       render: (_, record) => (
-        <Button
-          className="!bg-[#e0ffe4]"
-          onClick={() => handleUserDetails(record)}
-        >
-          <EyeOutlined /> View Details
-        </Button>
+        <Space>
+          <Avatar size={45} src={record.profile_picture} />
+          <div>
+            <div className="flex gap-2 items-center">
+              <strong>{record.name || "Guest User"}</strong>
+              {record.is_guest && <Tag color="orange">Guest</Tag>}
+            </div>
+            <div className="text-xs text-gray-500">
+              {record.email || "No Email"}
+            </div>
+          </div>
+        </Space>
+      ),
+    },
+
+    {
+      title: "Plan",
+      render: (_, record) => (
+        <Tag color="blue">{record.subscription?.plan_name || "Free"}</Tag>
+      ),
+    },
+
+    {
+      title: "Status",
+      render: (_, record) => {
+        const status = getSubscriptionStatus(record);
+        let color = "default";
+        if (status === "ACTIVE") color = "green";
+        if (status === "EXPIRED") color = "red";
+        if (status === "FREE") color = "gold";
+        return <Tag color={color}>{status}</Tag>;
+      },
+    },
+
+    {
+      title: "Is Active",
+      render: (_, record) => (
+        <Tag color={record.is_active ? "green" : "red"}>
+          {record.is_active ? "Active" : "Inactive"}
+        </Tag>
+      ),
+    },
+
+    {
+      title: "Registration",
+      render: (_, record) => (
+        <span>
+          {record.date_joined
+            ? new Date(record.date_joined).toLocaleDateString()
+            : "-"}
+        </span>
+      ),
+    },
+
+    {
+      title: "Next Payment",
+      render: (_, record) => {
+        if (!record.subscription) return "-";
+        const endDate = new Date(record.subscription.current_period_end);
+        const today = new Date();
+        const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+        return (
+          <div>
+            {endDate.toLocaleDateString()}
+            {diffDays <= 3 && diffDays > 0 && (
+              <Tag color="warning" className="ml-2">
+                Expiring Soon
+              </Tag>
+            )}
+            {diffDays <= 0 && (
+              <Tag color="red" className="ml-2">
+                Expired
+              </Tag>
+            )}
+          </div>
+        );
+      },
+    },
+
+    {
+      title: "Action",
+      render: (_, record) => (
+        <Space>
+          {/* <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            onClick={() => handleUserDetails(record)}
+          >
+            View
+          </Button> */}
+
+          <Button
+            type="default"
+            icon={<PoweroffOutlined />}
+            onClick={() => handleOpenActiveModal(record)}
+            style={{
+              borderColor: record.is_active ? "#faad14" : "#52c41a",
+              color: record.is_active ? "#faad14" : "#52c41a",
+            }}
+          >
+            {record.is_active ? "Deactivate" : "Activate"}
+          </Button>
+
+          {/* <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleOpenDeleteModal(record)}
+          >
+            Delete
+          </Button> */}
+        </Space>
       ),
     },
   ];
 
-  if (isLoading) {
-    return <IsLoading />;
-  }
-
-  if (isError) {
-    return <IsError error={error} refetch={refetch} />;
-  }
+  if (isLoading) return <IsLoading />;
+  if (isError) return <IsError error={error} refetch={refetch} />;
 
   return (
-    <div className="">
+    <div>
       <div className="flex justify-between mb-4">
-        <div className="flex gap-4">
+        <Space size={16}>
           <Search
+            placeholder="Search name or email"
+            allowClear
             size="large"
-            placeholder="Search by name or email"
             onSearch={onSearch}
-            style={{ width: 400 }}
+            style={{ width: 350 }}
           />
+        </Space>
 
-          <Select
-            size="large"
-            placeholder="Select a plan"
-            optionFilterProp="label"
-            onChange={onChange}
-            options={[
-              {
-                value: "Monthly",
-                label: "Monthly",
-              },
-              {
-                value: "Quarterly",
-                label: "Quarterly",
-              },
-              {
-                value: "Yearly",
-                label: "Yearly",
-              },
-            ]}
-          />
-        </div>
-        <div>
-          <AddUser refetch={refetch} />
-        </div>
+        {/* <AddUser refetch={refetch} /> */}
       </div>
 
       <Table
         columns={columns}
-        dataSource={allUsers}
+        dataSource={allUsers?.results}
         rowKey="id"
         pagination={{
           current: filter.page,
           pageSize: filter.limit,
-          total: allUsers.length,
+          total: allUsers?.count,
           showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50", "100"],
         }}
         onChange={handleTableChange}
-        loading={isLoading}
       />
 
-      <ViewUser
+      {/* <ViewUser
         userDetailsData={userDetailsData}
         isOpen={isViewModalOpen}
         onClose={handleModalClose}
         refetch={refetch}
-      />
+      /> */}
+
+      {/* Active / Deactive Modal */}
+      <Modal
+        title={
+          <Space>
+            <PoweroffOutlined
+              style={{
+                color: activeModalData?.is_active ? "#faad14" : "#52c41a",
+              }}
+            />
+            <span>
+              {activeModalData?.is_active ? "Deactivate" : "Activate"} User
+            </span>
+          </Space>
+        }
+        open={isActiveModalOpen}
+        onCancel={handleActiveModalClose}
+        footer={[
+          <Button key="cancel" onClick={handleActiveModalClose}>
+            Cancel
+          </Button>,
+          <Button
+            key="confirm"
+            type="primary"
+            danger={activeModalData?.is_active}
+            style={
+              !activeModalData?.is_active
+                ? { backgroundColor: "#52c41a", borderColor: "#52c41a" }
+                : {}
+            }
+            loading={activeLoading}
+            onClick={handleToggleActive}
+          >
+            {activeModalData?.is_active ? "Yes, Deactivate" : "Yes, Activate"}
+          </Button>,
+        ]}
+      >
+        <p>
+          Are you sure you want to{" "}
+          <strong>
+            {activeModalData?.is_active ? "deactivate" : "activate"}
+          </strong>{" "}
+          the user{" "}
+          <strong>
+            {activeModalData?.name || activeModalData?.email || "this user"}
+          </strong>
+          ?
+        </p>
+
+        {activeModalData?.is_active && (
+          <p className="text-gray-500 text-sm mt-1">
+            Deactivating will prevent this user from logging in.
+          </p>
+        )}
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal
+        title={
+          <Space>
+            <DeleteOutlined style={{ color: "#ff4d4f" }} />
+            <span>Delete User</span>
+          </Space>
+        }
+        open={isDeleteModalOpen}
+        onCancel={handleDeleteModalClose}
+        footer={[
+          <Button key="cancel" onClick={handleDeleteModalClose}>
+            Cancel
+          </Button>,
+          <Button
+            key="confirm"
+            type="primary"
+            danger
+            loading={deleteLoading}
+            onClick={handleDeleteUser}
+          >
+            Yes, Delete
+          </Button>,
+        ]}
+      >
+        <p>
+          Are you sure you want to permanently delete the user{" "}
+          <strong>
+            {deleteModalData?.name || deleteModalData?.email || "this user"}
+          </strong>
+          ?
+        </p>
+        <p className="text-gray-500 text-sm mt-1">
+          This action cannot be undone.
+        </p>
+      </Modal>
     </div>
   );
 }

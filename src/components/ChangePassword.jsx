@@ -13,24 +13,22 @@ const ChangePassword = () => {
   const handleFinish = async (values) => {
     try {
       setLoading(true);
-      // const res = await API.patch("/admin-dashboard/password-reset/", {
-      //   old_password: values.old_password,
-      //   new_password: values.new_password,
-      //   confirm_password: values.retype_new_password,
-      // });
+      const res = await API.post("/accounts/me/change-password/", {
+        current_password: values.old_password,
+        new_password: values.new_password,
+        new_password2: values.retype_new_password,
+      });
 
-      // if (res.status === 200) {
-      //   message.success("Password changed successfully!");
-      //   setIsModalOpen(false);
-      // }
+      if (res.status === 200) {
+        message.success("Password changed successfully!");
         setIsModalOpen(false);
+      }
+      setIsModalOpen(false);
     } catch (error) {
+      console.error(error, "error");
       message.error(
-        error?.response?.data?.old_password
-          ? error?.response?.data?.old_password[0]
-          : error?.response?.data?.new_password
-          ? error?.response?.data?.new_password[0]
-          : "Password change failed. Please try again."
+        error?.response?.data?.message ||
+          "Login failed. Please check your credentials and try again.",
       );
     } finally {
       setLoading(false);
@@ -66,17 +64,24 @@ const ChangePassword = () => {
           <Form.Item
             label="New Password"
             name="new_password"
-            rules={[{ required: true, message: "Please enter a new password" }]}
+            rules={[
+              { required: true, message: "New Password is required." },
+              {
+                pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/,
+                message:
+                  "At least 8 chars, 1 uppercase, 1 number & 1 special char",
+              },
+            ]}
           >
             <Input.Password placeholder="Enter your new password" />
           </Form.Item>
 
           <Form.Item
-            label="Retype New Password"
+            label="Confirm New Password"
             name="retype_new_password"
             dependencies={["new_password"]}
             rules={[
-              { required: true, message: "Please retype your new password" },
+              { required: true, message: "Please confirm your new password" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue("new_password") === value) {
@@ -87,7 +92,7 @@ const ChangePassword = () => {
               }),
             ]}
           >
-            <Input.Password placeholder="Retype your new password" />
+            <Input.Password placeholder="Confirm your new password" />
           </Form.Item>
 
           <Form.Item>
@@ -95,6 +100,7 @@ const ChangePassword = () => {
               type="primary"
               className="my-main-button"
               htmlType="submit"
+              size="large"
               loading={loading}
               block
             >

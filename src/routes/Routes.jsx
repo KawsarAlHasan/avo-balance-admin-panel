@@ -12,6 +12,7 @@ import Payments from "../pages/payments/Payments";
 import PrivateRoute from "./PrivateRoute";
 import Plans from "../pages/plans/Plans";
 import Settings from "../pages/settings/Settings";
+import { AdminProvider } from "../context/AdminContext";
 
 export const router = createBrowserRouter([
   {
@@ -34,9 +35,9 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <PrivateRoute>
+      <AdminProvider>
         <MainLayout />
-      </PrivateRoute>
+      </AdminProvider>
     ),
     children: [
       {
